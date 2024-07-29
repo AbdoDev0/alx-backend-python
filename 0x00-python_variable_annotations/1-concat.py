@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
-"""Define concat function"""
+"""a type-annotated function"""
 
 
 def concat(str1: str, str2: str) -> str:
     """
-    Returns a concatenated string
-
-    Args:
-      str1 (string): First string
-      str2 (string): Second string
-
-    Returns:
-      str: A concatenated string.
+    type-annotated function that
+    accepts string arguments and returns
+    them caoncatenated
     """
     return str1 + str2

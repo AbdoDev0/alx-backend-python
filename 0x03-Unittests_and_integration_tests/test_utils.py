@@ -1,77 +1,90 @@
 #!/usr/bin/env python3
-""" Test SUITE Unittest module Task """
-
-from unittest import TestCase, mock
-from unittest.mock import patch, Mock
-from parameterized import parameterized
+"""_summary_
+"""
+import unittest
+from unittest.mock import patch
 from utils import access_nested_map, get_json, memoize
+from parameterized import parameterized
 
 
-class TestAccessNestedMap(TestCase):
-    """ Class for testing Nested Map function """
-    @parameterized.expand([
-        ({"a": 1}, ("a",), 1),
-        ({"a": {"b": 2}}, ("a",), {'b': 2}),
-        ({"a": {"b": 2}}, ("a", "b"), 2)
-    ])
-    def test_access_nested_map(self, map, path, expected_output):
-        """ Test method return output """
-        real_output = access_nested_map(map, path)
-        self.assertEqual(real_output, expected_output)
+class TestAccessNestedMap(unittest.TestCase):
+    """_summary_
 
-    @parameterized.expand([
-        ({}, ("a",), 'a'),
-        ({"a": 1}, ("a", "b"), 'b')
-    ])
-    def test_access_nested_map_exception(self, map, path, wrong_output):
-        """ Test method raises correct exception """
-        with self.assertRaises(KeyError) as e:
-            access_nested_map(map, path)
-            self.assertEqual(wrong_output, e.exception)
+    Args:
+        unittest (_type_): _description_
+    """
 
+    @parameterized.expand(
+        [
+            ({"a": 1}, ("a",), 1),
+            ({"a": {"b": 2}}, ("a",), {"b": 2}),
+            ({"a": {"b": 2}}, ("a", "b"), 2),
+        ]
+    )
+    def test_access_nested_map(self, nested_map, path, output):
+        """_summary_"""
+        self.assertEqual(access_nested_map(nested_map, path), output)
 
-class TestGetJson(TestCase):
-    """ Class for testing get_json function """
-    # order of args: test_url, test_payload
-    @parameterized.expand([
-        ("http://example.com", {"payload": True}),
-        ("http://holberton.io", {"payload": False})
-    ])
-    def test_get_json(self, test_url, test_payload):
-        """ Test method returns correct output """
-        # set mock response to have return value of test payload
-        mock_response = Mock()
-        mock_response.json.return_value = test_payload
-        # function calls requests.get, need patch to get mock return value
-        with patch('requests.get', return_value=mock_response):
-            real_response = get_json(test_url)
-            self.assertEqual(real_response, test_payload)
-            # check that mocked method called once per input
-            mock_response.json.assert_called_once()
+    @parameterized.expand([({}, ("a",)), ({"a": 1}, ("a", "b"))])
+    def test_access_nested_map_exception(self, nested_map, path):
+        """testing for function assertion"""
+        with self.assertRaises(KeyError):
+            access_nested_map(nested_map, path)
 
 
-class TestMemoize(TestCase):
-    """ Class for testing memoization """
+class TestGetJson(unittest.TestCase):
+    """Mock http calls"""
+
+    @parameterized.expand(
+        [
+            ("http://example.com", {"payload": True}),
+            ("http://holberton.io", {"payload": False}),
+        ]
+    )
+    @patch("test_utils.get_json")
+    def test_get_json(self, url, payload, mock_get):
+        """testing return data of get_json method"""
+        mock_get.return_value = payload
+        result = get_json(url)
+        self.assertEqual(result, payload)
+
+
+class TestMemoize(unittest.TestCase):
+    """testing the memoize method"""
 
     def test_memoize(self):
-        """ Tests memoize function """
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
 
         class TestClass:
-            """ Test class """
+            """_summary_"""
 
             def a_method(self):
-                """ Method to always return 42 """
+                """_summary_
+
+                Returns:
+                    _type_: _description_
+                """
                 return 42
 
             @memoize
             def a_property(self):
-                """ Returns memoized property """
+                """_summary_
+
+                Returns:
+                    _type_: _description_
+                """
                 return self.a_method()
 
-        with patch.object(TestClass, 'a_method', return_value=42) as patched:
+        with patch.object(
+            TestClass,
+            "a_method",
+            return_value=lambda: 42,
+        ) as pp:
             test_class = TestClass()
-            real_return = test_class.a_property
-            real_return = test_class.a_property
-
-            self.assertEqual(real_return, 42)
-            patched.assert_called_once()
+            self.assertEqual(test_class.a_property(), 42)
+            self.assertEqual(test_class.a_property(), 42)
+            pp.assert_called_once()

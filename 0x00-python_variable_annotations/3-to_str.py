@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
-"""Define to_str function"""
+"""a type-annotated function to_str"""
 
 
 def to_str(n: float) -> str:
-    """
-    Returns the string representation of the float
-
-    Args:
-      n (float): float
-
-    Returns:
-      str: String representation of the float
-    """
+    """to_str that takes a float n as
+    argument and returns the string
+    representation of the float"""
     return str(n)
